@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html class="light" lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Perfil - Controle de Peso</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#ff7857",
+                        "success": "#4CAF50",
+                        "background-light": "#fafaf9",
+                        "background-dark": "#17191e",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.25rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            min-height: max(884px, 100dvh);
+            font-family: 'Lexend', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden">
+    <div class="max-w-md mx-auto min-h-screen flex flex-col relative">
+        <header class="flex items-center bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md p-3 pb-1 justify-between sticky top-0 z-10">
+            <div onclick="window.location.href='history.html'" class="text-primary flex size-10 shrink-0 items-center cursor-pointer">
+                <span class="material-symbols-outlined">arrow_back_ios_new</span>
+            </div>
+            <h2 class="text-slate-900 dark:text-white text-base font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">Perfil</h2>
+        </header>
+
+        <main class="flex-1 px-4 pb-28">
+            <div class="pt-2 pb-3">
+                <h2 class="text-slate-900 dark:text-white tracking-tight text-2xl font-bold leading-tight text-left">
+                    Personalize seu perfil
+                </h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-tight pt-1">
+                    Ajuste os campos para calcular suas metas.
+                </p>
+            </div>
+
+            <form id="profile-form" class="space-y-3 mt-1">
+                <section class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-slate-900 dark:text-white text-sm font-semibold">Nome ou Apelido</h3>
+                    </div>
+                    <div class="relative">
+                        <input id="name" class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-lg py-2 px-3 text-lg font-semibold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-slate-300" placeholder="Como quer ser chamado?" type="text"/>
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <section class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-slate-900 dark:text-white text-xs font-bold mb-2 uppercase opacity-70">Idade</h3>
+                        <div class="relative flex items-center">
+                            <input id="age" class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-lg py-2 pl-3 pr-10 text-xl font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary outline-none" placeholder="25" type="number" min="1" max="120"/>
+                            <span class="absolute right-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">ANOS</span>
+                        </div>
+                    </section>
+
+                    <section class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-slate-900 dark:text-white text-xs font-bold mb-2 uppercase opacity-70">Altura</h3>
+                        <div class="relative flex items-center">
+                            <input id="height" class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-lg py-2 pl-3 pr-8 text-xl font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary outline-none" placeholder="175" type="number" min="100" max="250"/>
+                            <span class="absolute right-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">CM</span>
+                        </div>
+                    </section>
+                </div>
+
+                <section class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                    <div class="flex items-center gap-4">
+                        <h3 class="text-slate-900 dark:text-white text-sm font-semibold shrink-0">Eu sou:</h3>
+                        <div class="flex h-9 grow items-center rounded-lg bg-slate-100 dark:bg-slate-900 p-1">
+                            <label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm text-slate-500 has-[:checked]:text-primary text-xs font-medium transition-all">
+                                <span>Masculino</span>
+                                <input id="gender-male" class="hidden" name="gender" type="radio" value="male"/>
+                            </label>
+                            <label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-md px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-slate-700 has-[:checked]:shadow-sm text-slate-500 has-[:checked]:text-primary text-xs font-medium transition-all">
+                                <span>Feminino</span>
+                                <input id="gender-female" class="hidden" name="gender" type="radio" value="female"/>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <section class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-slate-900 dark:text-white text-xs font-bold mb-2 uppercase opacity-70">Peso Atual</h3>
+                        <div class="relative flex items-center">
+                            <input id="current-weight" class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-lg py-2 px-3 pr-8 text-xl font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary outline-none" placeholder="85.0" step="0.1" type="number" min="20" max="300"/>
+                            <span class="absolute right-2 text-[10px] text-slate-400 font-bold uppercase">KG</span>
+                        </div>
+                    </section>
+
+                    <section class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-slate-900 dark:text-white text-xs font-bold mb-2 uppercase opacity-70">Cintura</h3>
+                        <div class="relative flex items-center">
+                            <input id="waist" class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-lg py-2 px-3 pr-8 text-xl font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary outline-none" placeholder="90" type="number" min="40" max="200"/>
+                            <span class="absolute right-2 text-[10px] text-slate-400 font-bold uppercase">CM</span>
+                        </div>
+                    </section>
+                </div>
+
+                <section class="space-y-3">
+                    <div id="ideal-weight-display" class="bg-success p-4 rounded-xl shadow-md shadow-success/10 text-white relative overflow-hidden">
+                        <div class="relative z-10 flex justify-between items-center">
+                            <div>
+                                <div class="flex items-center gap-1.5 mb-0.5">
+                                    <span class="material-symbols-outlined text-[16px]">verified</span>
+                                    <span class="text-[10px] font-bold uppercase tracking-wider opacity-90">Peso Ideal</span>
+                                </div>
+                                <div class="text-2xl font-bold"><span id="ideal-range">-</span> <span class="text-sm font-medium opacity-80">kg</span></div>
+                            </div>
+                            <p class="text-[9px] opacity-90 leading-tight max-w-[120px] text-right">
+                                Baseado no IMC saudável (18.5 - 24.9).
+                            </p>
+                        </div>
+                        <span class="material-symbols-outlined absolute -right-3 -bottom-3 text-[70px] opacity-10 rotate-12 pointer-events-none">monitor_weight</span>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-slate-900 dark:text-white text-sm font-semibold mb-2">Qual seu Peso Alvo?</h3>
+                        <div class="relative flex items-center">
+                            <input id="target-weight" class="w-full bg-slate-50 dark:bg-slate-900 border-none rounded-lg py-2 px-3 text-xl font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-primary outline-none transition-all placeholder:text-slate-300" placeholder="70.0" step="0.1" type="number" min="20" max="300"/>
+                            <span class="absolute right-3 text-sm text-slate-400 font-medium">kg</span>
+                        </div>
+                    </div>
+                </section>
+            </form>
+        </main>
+
+        <footer class="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-4 bg-gradient-to-t from-background-light via-background-light/95 dark:from-background-dark dark:via-background-dark/95 to-transparent z-20">
+            <button onclick="saveProfile()" type="button" class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3.5 rounded-xl shadow-[0_8px_20px_-4px_rgba(255,120,87,0.4)] transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                <span>Salvar Perfil</span>
+                <span class="material-symbols-outlined text-[18px]">check</span>
+            </button>
+        </footer>
+
+        <div class="absolute -top-12 -right-12 size-48 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-1/2 -left-24 size-48 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+    </div>
+
+    <script src="storage.js"></script>
+    <script src="calculations.js"></script>
+    <script>
+        // Carregar dados do perfil
+        function loadProfile() {
+            const profile = getProfile();
+            
+            if (profile) {
+                document.getElementById('name').value = profile.name || '';
+                document.getElementById('age').value = profile.age || '';
+                document.getElementById('height').value = profile.height || '';
+                document.getElementById('current-weight').value = profile.currentWeight || '';
+                document.getElementById('waist').value = profile.waist || '';
+                document.getElementById('target-weight').value = profile.targetWeight || '';
+                
+                if (profile.gender === 'male') {
+                    document.getElementById('gender-male').checked = true;
+                } else if (profile.gender === 'female') {
+                    document.getElementById('gender-female').checked = true;
+                }
+            }
+            
+            updateIdealWeight();
+        }
+
+        // Atualizar peso ideal
+        function updateIdealWeight() {
+            const height = parseFloat(document.getElementById('height').value);
+            
+            if (height && height > 0) {
+                const heightM = height / 100;
+                const minWeight = (18.5 * heightM * heightM).toFixed(1);
+                const maxWeight = (24.9 * heightM * heightM).toFixed(1);
+                document.getElementById('ideal-range').textContent = `${minWeight} - ${maxWeight}`;
+            } else {
+                document.getElementById('ideal-range').textContent = '-';
+            }
+        }
+
+        // Salvar perfil
+        function saveProfile() {
+            const profile = {
+                name: document.getElementById('name').value,
+                age: parseInt(document.getElementById('age').value) || null,
+                height: parseFloat(document.getElementById('height').value) || null,
+                gender: document.querySelector('input[name="gender"]:checked')?.value || null,
+                currentWeight: parseFloat(document.getElementById('current-weight').value) || null,
+                waist: parseFloat(document.getElementById('waist').value) || null,
+                targetWeight: parseFloat(document.getElementById('target-weight').value) || null
+            };
+
+            if (!profile.height) {
+                alert('Por favor, informe sua altura!');
+                return;
+            }
+
+            if (!profile.gender) {
+                alert('Por favor, selecione seu sexo!');
+                return;
+            }
+
+            saveProfileData(profile);
+            alert('Perfil salvo com sucesso!');
+            window.location.href = 'index.html';
+        }
+
+        // Event listeners
+        document.getElementById('height').addEventListener('input', updateIdealWeight);
+        
+        // Carregar ao iniciar
+        loadProfile();
+    </script>
+</body>
+</html>
