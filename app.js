@@ -1,8 +1,8 @@
 // ==============================================
-// HEALTH TRACKER - APP JAVASCRIPT
+// HEALTH TRACKER - LOGIC (Revisado para novo design)
 // ==============================================
 
-// Estrutura de dados da aplicação
+// Estrutura de dados
 let appData = {
     profile: {
         name: '',
@@ -10,145 +10,104 @@ let appData = {
         height: null,
         gender: 'female',
         currentWeight: null,
-        currentWaist: null,
-        targetWeight: null
+        currentWaist: null
     },
     measurements: []
 };
 
-// ==============================================
-// INICIALIZAÇÃO
-// ==============================================
-
+// Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     loadData();
+    
+    // Verificar se tem dados
+    if (!appData.profile.name && appData.measurements.length === 0) {
+        document.getElementById('welcome-screen').classList.remove('hidden');
+    } else {
+        startApp();
+    }
+
+    // Configuração inicial
     setTodayDate();
     updateThemeIcon();
     
-    // Aplicar tema salvo
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    if (savedTheme === 'dark') {
-        document.documentElement.classList.add('dark');
-    }
-    
-    // Registrar Service Worker
+    // Registrar SW
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js')
-            .then(reg => console.log('Service Worker registrado'))
-            .catch(err => console.log('Erro no Service Worker:', err));
+            .then(() => console.log('SW registrado'))
+            .catch(err => console.error('Erro SW:', err));
     }
 });
 
 // ==============================================
-// NAVEGAÇÃO
+// NAVEGAÇÃO E UI
 // ==============================================
 
 function startApp() {
     document.getElementById('welcome-screen').classList.add('hidden');
     document.getElementById('app-container').classList.remove('hidden');
+    updateHomeScreen();
     showScreen('home-screen');
 }
 
 function showScreen(screenId) {
-    // Esconder todas as telas
-    const screens = ['home-screen', 'profile-screen', 'data-screen'];
-    screens.forEach(id => {
-        const screen = document.getElementById(id);
-        if (screen) screen.classList.add('hidden');
+    // Telas
+    ['home-screen', 'profile-screen', 'data-screen'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
     });
-    
-    // Mostrar tela selecionada
-    const targetScreen = document.getElementById(screenId);
-    if (targetScreen) {
-        targetScreen.classList.remove('hidden');
-        targetScreen.classList.add('fade-in');
-    }
-    
-    // Atualizar navegação ativa
-    updateNavigation(screenId);
-    
-    // Atualizar dados específicos da tela
-    if (screenId === 'profile-screen') {
-        loadProfileData();
-    } else if (screenId === 'home-screen') {
-        updateHomeScreen();
-    }
-}
+    document.getElementById(screenId).classList.remove('hidden');
 
-function updateNavigation(screenId) {
-    // Remover classe ativa de todos
-    document.querySelectorAll('nav button').forEach(btn => {
-        btn.classList.remove('nav-item-active');
+    // Navegação Botões
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-primary', 'active');
+        btn.classList.add('text-gray-400');
         const icon = btn.querySelector('.material-symbols-outlined');
-        const text = btn.querySelector('span:last-child');
-        if (icon) {
-            icon.classList.remove('text-primary');
-            icon.classList.add('text-gray-400');
-        }
-        if (text) {
-            text.classList.remove('text-primary');
-            text.classList.add('text-gray-400');
-        }
+        if(icon) icon.classList.remove('filled-icon');
     });
-    
-    // Adicionar classe ativa ao correto
-    let navId = '';
-    if (screenId === 'home-screen') navId = 'nav-home';
-    else if (screenId === 'data-screen') navId = 'nav-data';
-    else if (screenId === 'profile-screen') navId = 'nav-profile';
-    
-    if (navId) {
-        const activeNav = document.getElementById(navId);
-        if (activeNav) {
-            activeNav.classList.add('nav-item-active');
-            const icon = activeNav.querySelector('.material-symbols-outlined');
-            const text = activeNav.querySelector('span:last-child');
-            if (icon) {
-                icon.classList.remove('text-gray-400');
-                icon.classList.add('text-primary');
-            }
-            if (text) {
-                text.classList.remove('text-gray-400');
-                text.classList.add('text-primary');
-            }
-        }
-    }
-}
 
-// ==============================================
-// TEMA ESCURO
-// ==============================================
+    const activeBtnId = screenId.replace('-screen', '') === 'home' ? 'nav-home' : 'nav-' + screenId.replace('-screen', '');
+    const activeBtn = document.getElementById(activeBtnId);
+    if (activeBtn) {
+        activeBtn.classList.add('text-primary', 'active');
+        activeBtn.classList.remove('text-gray-400');
+        const icon = activeBtn.querySelector('.material-symbols-outlined');
+        if(icon) icon.classList.add('filled-icon');
+    }
+
+    if (screenId === 'profile-screen') loadProfileForm();
+    if (screenId === 'data-screen') updateHistoryList();
+    if (screenId === 'home-screen') updateHomeScreen();
+}
 
 function toggleDarkMode() {
     document.documentElement.classList.toggle('dark');
-    const isDark = document.documentElement.classList.contains('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     updateThemeIcon();
 }
 
 function updateThemeIcon() {
-    const isDark = document.documentElement.classList.contains('dark');
-    const icons = ['theme-icon', 'theme-icon-profile'];
-    icons.forEach(id => {
-        const icon = document.getElementById(id);
-        if (icon) icon.textContent = isDark ? 'light_mode' : 'dark_mode';
-    });
+    const isDark = localStorage.getItem('theme') === 'dark' || 
+                  (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    
+    if (isDark) document.documentElement.classList.add('dark');
+    else document.documentElement.classList.remove('dark');
+
+    const icon = document.getElementById('theme-icon');
+    if (icon) icon.textContent = document.documentElement.classList.contains('dark') ? 'light_mode' : 'dark_mode';
 }
 
 // ==============================================
-// MODAL ADICIONAR MEDIDA
+// MODAL DE REGISTRO
 // ==============================================
 
 function openAddModal() {
     document.getElementById('add-modal').classList.remove('hidden');
     setTodayDate();
-    // Limpar campos
-    document.getElementById('modal-weight').value = '';
-    document.getElementById('modal-waist').value = '';
-    // Focar no campo de peso
-    setTimeout(() => {
-        document.getElementById('modal-weight').focus();
-    }, 100);
+    // Tentar preencher cintura anterior
+    if (appData.measurements.length > 0) {
+        const last = appData.measurements[0];
+        if (last.waist) document.getElementById('modal-waist').value = last.waist;
+    }
 }
 
 function closeAddModal() {
@@ -161,476 +120,305 @@ function setTodayDate() {
     if (dateInput) dateInput.value = today;
 }
 
-function repeatLastWaist() {
-    if (appData.measurements.length > 0) {
-        const lastMeasurement = appData.measurements[appData.measurements.length - 1];
-        if (lastMeasurement.waist) {
-            document.getElementById('modal-waist').value = lastMeasurement.waist;
-        }
-    }
-}
-
 function saveMeasurement() {
     const weight = parseFloat(document.getElementById('modal-weight').value);
     const waist = parseFloat(document.getElementById('modal-waist').value) || null;
     const date = document.getElementById('modal-date').value;
-    
+
     if (!weight || !date) {
-        alert('Por favor, preencha pelo menos o peso e a data.');
+        alert('Informe pelo menos o Peso e a Data.');
         return;
     }
-    
-    // Criar nova medida
-    const measurement = {
+
+    const newMeasure = {
         id: Date.now(),
-        weight: weight,
-        waist: waist,
-        date: date,
+        weight,
+        waist,
+        date,
         timestamp: new Date(date).getTime()
     };
-    
-    // Adicionar à lista
-    appData.measurements.push(measurement);
-    
-    // Ordenar por data (mais recente primeiro)
-    appData.measurements.sort((a, b) => b.timestamp - a.timestamp);
-    
-    // Atualizar peso e cintura atuais no perfil
+
+    appData.measurements.push(newMeasure);
+    appData.measurements.sort((a, b) => b.timestamp - a.timestamp); // Mais recente primeiro
+
+    // Atualiza perfil com dados atuais
     appData.profile.currentWeight = weight;
     if (waist) appData.profile.currentWaist = waist;
-    
-    // Salvar dados
+
     saveData();
-    
-    // Fechar modal e atualizar tela
     closeAddModal();
+    
+    // Limpar campos
+    document.getElementById('modal-weight').value = '';
+    
     updateHomeScreen();
+    alert('Registro salvo!');
 }
 
 // ==============================================
-// TELA INICIAL / DASHBOARD
+// DASHBOARD & CÁLCULOS
 // ==============================================
 
 function updateHomeScreen() {
-    // Atualizar header
-    const headerName = document.getElementById('header-name');
-    const headerDate = document.getElementById('header-date');
+    // 1. Atualizar Header
+    const nameEl = document.getElementById('header-name');
+    if (nameEl) nameEl.textContent = appData.profile.name || 'Visitante';
+
+    // 2. Verificar se há dados
+    if (appData.measurements.length === 0) return;
+
+    const current = appData.measurements[0];
+    const previous = appData.measurements.length > 1 ? appData.measurements[1] : null;
+
+    // 3. Atualizar Peso
+    document.getElementById('dash-weight').textContent = current.weight.toFixed(1);
     
-    if (headerName) {
-        headerName.textContent = appData.profile.name || 'Usuário';
-    }
-    
-    if (headerDate) {
-        const today = new Date();
-        const options = { weekday: 'long', day: 'numeric', month: 'long' };
-        headerDate.textContent = today.toLocaleDateString('pt-BR', options);
-    }
-    
-    // Verificar se há medidas
-    if (appData.measurements.length === 0) {
-        document.getElementById('last-measurement-section').classList.add('hidden');
-        document.getElementById('empty-state').classList.remove('hidden');
-        return;
-    }
-    
-    document.getElementById('last-measurement-section').classList.remove('hidden');
-    document.getElementById('empty-state').classList.add('hidden');
-    
-    // Última medida
-    const lastMeasurement = appData.measurements[0];
-    
-    // Data da última medida
-    const measurementDate = new Date(lastMeasurement.date);
-    const dateOptions = { day: 'numeric', month: 'short', year: 'numeric' };
-    document.getElementById('last-measurement-date').textContent = 
-        measurementDate.toLocaleDateString('pt-BR', dateOptions);
-    
-    // Peso
-    document.getElementById('last-weight').textContent = lastMeasurement.weight.toFixed(1) + ' kg';
-    
-    // Cintura
-    const waistElement = document.getElementById('last-waist');
-    if (lastMeasurement.waist) {
-        waistElement.textContent = lastMeasurement.waist + ' cm';
+    const trendEl = document.getElementById('dash-weight-trend');
+    if (previous) {
+        const diff = current.weight - previous.weight;
+        const icon = diff > 0 ? 'trending_up' : (diff < 0 ? 'trending_down' : 'remove');
+        const colorClass = diff > 0 ? 'text-red-500' : (diff < 0 ? 'text-emerald-500' : 'text-gray-400');
+        const text = diff === 0 ? 'Estável' : `${Math.abs(diff).toFixed(1)}kg`;
+        
+        trendEl.className = `mt-1 flex items-center gap-1 text-xs font-bold ${colorClass}`;
+        trendEl.innerHTML = `<span class="material-symbols-outlined text-sm">${icon}</span><span>${text}</span>`;
     } else {
-        waistElement.textContent = '—';
+        trendEl.innerHTML = `<span class="text-gray-400">Primeiro registro</span>`;
     }
-    
-    // Calcular e mostrar indicadores
-    updateIndicators(lastMeasurement);
+
+    // 4. Calcular IMC
+    if (appData.profile.height) {
+        const h = appData.profile.height / 100;
+        const bmi = current.weight / (h * h);
+        
+        document.getElementById('dash-bmi').textContent = bmi.toFixed(1);
+        
+        const bmiBadge = document.getElementById('dash-bmi-badge');
+        let bmiStatus = '';
+        let bmiColor = '';
+        let bmiBg = '';
+
+        if (bmi < 18.5) { bmiStatus = 'BAIXO PESO'; bmiColor = 'text-blue-600'; bmiBg = 'bg-blue-100 dark:bg-blue-900/30'; }
+        else if (bmi < 25) { bmiStatus = 'SAUDÁVEL'; bmiColor = 'text-emerald-600'; bmiBg = 'bg-emerald-100 dark:bg-emerald-900/30'; }
+        else if (bmi < 30) { bmiStatus = 'SOBREPESO'; bmiColor = 'text-yellow-600'; bmiBg = 'bg-yellow-100 dark:bg-yellow-900/30'; }
+        else { bmiStatus = 'OBESIDADE'; bmiColor = 'text-red-600'; bmiBg = 'bg-red-100 dark:bg-red-900/30'; }
+
+        bmiBadge.className = `mt-1 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase w-fit ${bmiBg} ${bmiColor}`;
+        bmiBadge.textContent = bmiStatus;
+    }
+
+    // 5. Saúde Metabólica (RCE e RFM)
+    if (current.waist && appData.profile.height) {
+        // RCE
+        const rce = current.waist / appData.profile.height;
+        document.getElementById('dash-rce').textContent = rce.toFixed(2);
+        
+        const rceBadge = document.getElementById('dash-rce-badge');
+        let rceStatus = rce < 0.5 ? 'ÓTIMO' : (rce < 0.55 ? 'ALERTA' : 'RISCO');
+        let rceColor = rce < 0.5 ? 'text-emerald-600 bg-emerald-100' : (rce < 0.55 ? 'text-yellow-600 bg-yellow-100' : 'text-red-600 bg-red-100');
+        if (document.documentElement.classList.contains('dark')) {
+             rceColor = rce < 0.5 ? 'text-emerald-400 bg-emerald-900/30' : (rce < 0.55 ? 'text-yellow-400 bg-yellow-900/30' : 'text-red-400 bg-red-900/30');
+        }
+
+        rceBadge.className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${rceColor}`;
+        rceBadge.textContent = rceStatus;
+
+        // Barra RCE (0.4 a 0.7 range visual)
+        let rcePos = ((rce - 0.4) / (0.7 - 0.4)) * 100;
+        rcePos = Math.max(0, Math.min(100, rcePos));
+        document.getElementById('dash-rce-marker').style.left = `${rcePos}%`;
+
+        // RFM
+        const hM = appData.profile.height / 100;
+        const isMale = appData.profile.gender === 'male';
+        let rfm = 0;
+        if (isMale) rfm = 64 - (20 * hM / current.waist) + 12; // Aprox formula
+        else rfm = 76 - (20 * hM / current.waist); // Aprox formula
+        // Formula mais comum: 64 - (20 * (Altura/Cintura)) + (12 * Sexo(0 ou 1)) -> Essa varia muito.
+        // Vamos usar a Relative Fat Mass (RFM) = 64 - (20 x (height / waist circumference)) + (12 x sex) where sex = 0 for men and 1 for women.
+        // Correção formula Cedars-Sinai: 
+        // Homens: 64 - (20 * height / waist)
+        // Mulheres: 76 - (20 * height / waist)
+        
+        // Vamos usar a formula correta implementada antes:
+        if (isMale) rfm = 64 - (20 * appData.profile.height / current.waist);
+        else rfm = 76 - (20 * appData.profile.height / current.waist);
+
+        document.getElementById('dash-rfm').textContent = rfm.toFixed(1);
+        document.getElementById('dash-rfm-badge').textContent = isMale ? (rfm < 20 ? 'FIT' : 'NORMAL') : (rfm < 30 ? 'FIT' : 'NORMAL');
+        
+        // Barra RFM (Range 10% a 50%)
+        let rfmPos = ((rfm - 10) / (50 - 10)) * 100;
+        rfmPos = Math.max(0, Math.min(100, rfmPos));
+        document.getElementById('dash-rfm-marker').style.left = `${rfmPos}%`;
+    }
+
+    // 6. Atualizar Gráfico (SVG Path)
+    updateChart();
 }
 
-function updateIndicators(measurement) {
-    const container = document.getElementById('indicators-container');
-    if (!container) return;
+function updateChart() {
+    if (appData.measurements.length < 2) return;
     
-    container.innerHTML = '';
+    // Pegar últimos 7 registros e inverter para cronológico (antigo -> novo)
+    const data = appData.measurements.slice(0, 7).reverse(); 
     
-    const profile = appData.profile;
+    // Configurações do SVG
+    const svgHeight = 100;
+    const svgWidth = 100;
     
-    // Verificar se temos dados suficientes
-    if (!profile.height || !profile.age) {
-        container.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">Complete seu perfil para ver os indicadores científicos</p>';
-        return;
-    }
-    
-    // Calcular IMC
-    const heightM = profile.height / 100;
-    const bmi = measurement.weight / (heightM * heightM);
-    const bmiStatus = getBMIStatus(bmi);
-    
-    container.innerHTML += createIndicatorCard('IMC', bmi.toFixed(1), bmiStatus, 'favorite');
-    
-    // Calcular RFM (Relative Fat Mass) - se temos cintura
-    if (measurement.waist && profile.gender) {
-        const rfm = calculateRFM(profile.height, measurement.waist, profile.gender);
-        const rfmStatus = getRFMStatus(rfm, profile.gender);
-        container.innerHTML += createIndicatorCard('RFM (% Gordura)', rfm.toFixed(1) + '%', rfmStatus, 'monitor_weight', 'Cedars-Sinai');
-    }
-    
-    // Calcular RCE (Relação Cintura-Estatura)
-    if (measurement.waist) {
-        const whr = measurement.waist / profile.height;
-        const whrStatus = getWHRStatus(whr);
-        container.innerHTML += createIndicatorCard('RCE (Cintura/Est.)', whr.toFixed(2), whrStatus, 'straighten', 'Meta: < 0.50');
-    }
-    
-    // Saúde Cardiovascular
-    if (measurement.waist) {
-        const cvRisk = getCardiovascularRisk(measurement.waist, profile.gender);
-        container.innerHTML += createIndicatorCard('Saúde Cardiovascular', cvRisk.text, cvRisk.status, 'favorite', cvRisk.description);
-    }
-    
-    // Mostrar evolução se houver mais de uma medida
-    if (appData.measurements.length > 1) {
-        showProgress();
-    }
-}
+    const minWeight = Math.min(...data.map(d => d.weight)) - 1;
+    const maxWeight = Math.max(...data.map(d => d.weight)) + 1;
+    const range = maxWeight - minWeight;
 
-function createIndicatorCard(label, value, status, icon, subtitle = null) {
-    const statusColors = {
-        'Excelente': 'text-green-600 dark:text-green-400',
-        'Ótimo': 'text-green-600 dark:text-green-400',
-        'Normal': 'text-green-600 dark:text-green-400',
-        'Peso Saudável': 'text-green-600 dark:text-green-400',
-        'Baixo Risco': 'text-green-600 dark:text-green-400',
-        'Sobrepeso': 'text-yellow-600 dark:text-yellow-400',
-        'Atenção': 'text-yellow-600 dark:text-yellow-400',
-        'Risco Aumentado': 'text-orange-600 dark:text-orange-400',
-        'Alto Risco': 'text-red-600 dark:text-red-400',
-        'Obesidade': 'text-red-600 dark:text-red-400'
-    };
-    
-    const statusColor = statusColors[status] || 'text-gray-600 dark:text-gray-400';
-    
-    return `
-        <div class="flex items-center justify-between py-2">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-lg">${icon}</span>
-                <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400">${label}</p>
-                    ${subtitle ? `<p class="text-[10px] text-gray-400 dark:text-gray-500">${subtitle}</p>` : ''}
-                </div>
-            </div>
-            <div class="text-right">
-                <p class="font-bold text-lg">${value}</p>
-                <p class="text-xs ${statusColor} font-medium">${status}</p>
-            </div>
-        </div>
-    `;
-}
+    // Gerar pontos
+    const points = data.map((d, index) => {
+        const x = (index / (data.length - 1)) * svgWidth;
+        const y = svgHeight - ((d.weight - minWeight) / range) * svgHeight;
+        return `${x},${y}`;
+    });
 
-function showProgress() {
-    const container = document.getElementById('indicators-container');
-    const first = appData.measurements[appData.measurements.length - 1];
-    const last = appData.measurements[0];
+    // Criar Path Smooth (Curva Bézier simples ou linha reta)
+    // Para simplificar e garantir visual clean: Linha reta ou curva suave
+    // Vamos usar comando 'L' para linha simples e limpa por enquanto, ou 'Q' para curva
+    const pathD = `M ${points.join(' L ')}`;
     
-    const weightChange = last.weight - first.weight;
-    const waistChange = (last.waist && first.waist) ? last.waist - first.waist : null;
+    document.getElementById('weight-chart-path').setAttribute('d', pathD);
+
+    // Labels (Dia da semana)
+    const labelsContainer = document.getElementById('chart-labels');
+    labelsContainer.innerHTML = '';
     
-    let progressHTML = '<div class="pt-4 border-t border-gray-100 dark:border-gray-800">';
-    progressHTML += '<p class="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2">📉 Sua Evolução</p>';
-    
-    const weightColor = weightChange <= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400';
-    progressHTML += `<p class="text-sm">• Peso: <span class="font-bold ${weightColor}">${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)} kg</span></p>`;
-    
-    if (waistChange !== null) {
-        const waistColor = waistChange <= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400';
-        progressHTML += `<p class="text-sm">• Cintura: <span class="font-bold ${waistColor}">${waistChange > 0 ? '+' : ''}${waistChange.toFixed(1)} cm</span></p>`;
-    }
-    
-    progressHTML += '</div>';
-    container.innerHTML += progressHTML;
-}
-
-// ==============================================
-// CÁLCULOS CIENTÍFICOS
-// ==============================================
-
-function calculateRFM(height, waist, gender) {
-    // RFM (Relative Fat Mass) - Cedars-Sinai Medical Center
-    const heightM = height / 100;
-    if (gender === 'male') {
-        return 64 - (20 * heightM / waist) + (12 * 1); // 1 para homens
-    } else {
-        return 76 - (20 * heightM / waist); // Mulheres
-    }
-}
-
-function getBMIStatus(bmi) {
-    if (bmi < 18.5) return 'Abaixo do peso';
-    if (bmi < 25) return 'Peso Saudável';
-    if (bmi < 30) return 'Sobrepeso';
-    return 'Obesidade';
-}
-
-function getRFMStatus(rfm, gender) {
-    // Faixas de gordura corporal saudável
-    if (gender === 'male') {
-        if (rfm < 15) return 'Muito Baixo';
-        if (rfm < 20) return 'Ótimo';
-        if (rfm < 25) return 'Normal';
-        if (rfm < 30) return 'Elevado';
-        return 'Alto';
-    } else {
-        if (rfm < 25) return 'Muito Baixo';
-        if (rfm < 30) return 'Ótimo';
-        if (rfm < 35) return 'Normal';
-        if (rfm < 40) return 'Elevado';
-        return 'Alto';
-    }
-}
-
-function getWHRStatus(whr) {
-    if (whr < 0.5) return 'Excelente';
-    if (whr < 0.53) return 'Normal';
-    if (whr < 0.58) return 'Atenção';
-    return 'Alto Risco';
-}
-
-function getCardiovascularRisk(waist, gender) {
-    // Baseado em diretrizes internacionais
-    if (gender === 'male') {
-        if (waist < 94) return { text: 'Baixo Risco', status: 'Normal', description: 'Cintura saudável' };
-        if (waist < 102) return { text: 'Risco Aumentado', status: 'Atenção', description: 'Atenção recomendada' };
-        return { text: 'Alto Risco', status: 'Alto Risco', description: 'Consulte um médico' };
-    } else {
-        if (waist < 80) return { text: 'Baixo Risco', status: 'Normal', description: 'Cintura saudável' };
-        if (waist < 88) return { text: 'Risco Aumentado', status: 'Atenção', description: 'Atenção recomendada' };
-        return { text: 'Alto Risco', status: 'Alto Risco', description: 'Consulte um médico' };
-    }
+    data.forEach(d => {
+        const date = new Date(d.date + 'T12:00:00'); // Fix timezone issue
+        const dayName = date.toLocaleDateString('pt-BR', { weekday: 'short' }).slice(0, 3);
+        
+        const el = document.createElement('div');
+        el.className = 'flex flex-col items-center gap-1 flex-1';
+        el.innerHTML = `<span class="text-[9px] font-bold bg-gray-50 dark:bg-gray-700/50 px-1 py-0.5 rounded text-gray-500 dark:text-gray-400 uppercase tracking-tighter w-full text-center">${dayName}</span>`;
+        labelsContainer.appendChild(el);
+    });
 }
 
 // ==============================================
 // PERFIL
 // ==============================================
 
-function loadProfileData() {
-    const profile = appData.profile;
+function loadProfileForm() {
+    const p = appData.profile;
+    document.getElementById('profile-name').value = p.name || '';
+    document.getElementById('profile-age').value = p.age || '';
+    document.getElementById('profile-height').value = p.height || '';
     
-    document.getElementById('profile-name').value = profile.name || '';
-    document.getElementById('profile-age').value = profile.age || '';
-    document.getElementById('profile-height').value = profile.height || '';
-    document.getElementById('profile-weight').value = profile.currentWeight || '';
-    document.getElementById('profile-waist').value = profile.currentWaist || '';
-    document.getElementById('profile-target').value = profile.targetWeight || '';
-    
-    // Sexo
-    if (profile.gender === 'male') {
-        document.getElementById('gender-male').checked = true;
-    } else {
-        document.getElementById('gender-female').checked = true;
-    }
-    
-    // Calcular peso ideal se temos altura
-    if (profile.height) {
-        calculateIdealWeight();
-    }
+    if (p.gender === 'male') document.getElementById('gender-male').checked = true;
+    else document.getElementById('gender-female').checked = true;
 }
-
-function calculateIdealWeight() {
-    const height = parseFloat(document.getElementById('profile-height').value);
-    if (!height) return;
-    
-    const heightM = height / 100;
-    const minWeight = (18.5 * heightM * heightM).toFixed(0);
-    const maxWeight = (24.9 * heightM * heightM).toFixed(0);
-    
-    const card = document.getElementById('ideal-weight-card');
-    const range = document.getElementById('ideal-weight-range');
-    
-    if (card && range) {
-        card.classList.remove('hidden');
-        range.textContent = `${minWeight} - ${maxWeight} kg`;
-    }
-}
-
-// Atualizar peso ideal quando altura mudar
-document.addEventListener('DOMContentLoaded', function() {
-    const heightInput = document.getElementById('profile-height');
-    if (heightInput) {
-        heightInput.addEventListener('input', calculateIdealWeight);
-    }
-});
 
 function saveProfile() {
-    const profile = appData.profile;
-    
-    profile.name = document.getElementById('profile-name').value;
-    profile.age = parseInt(document.getElementById('profile-age').value) || null;
-    profile.height = parseFloat(document.getElementById('profile-height').value) || null;
-    profile.currentWeight = parseFloat(document.getElementById('profile-weight').value) || null;
-    profile.currentWaist = parseFloat(document.getElementById('profile-waist').value) || null;
-    profile.targetWeight = parseFloat(document.getElementById('profile-target').value) || null;
-    
-    // Sexo
-    profile.gender = document.getElementById('gender-male').checked ? 'male' : 'female';
+    appData.profile.name = document.getElementById('profile-name').value;
+    appData.profile.age = parseInt(document.getElementById('profile-age').value);
+    appData.profile.height = parseFloat(document.getElementById('profile-height').value);
+    appData.profile.gender = document.getElementById('gender-male').checked ? 'male' : 'female';
     
     saveData();
-    
-    // Mostrar confirmação
-    alert('Perfil salvo com sucesso!');
-    
-    // Voltar para home
-    showScreen('home-screen');
+    alert('Perfil salvo!');
+    updateHomeScreen(); // Atualiza dashboard com novos dados de perfil
 }
 
 // ==============================================
-// BACKUP E EXPORTAÇÃO
+// DADOS E BACKUP
 // ==============================================
 
+function updateHistoryList() {
+    const container = document.getElementById('history-list');
+    container.innerHTML = '';
+
+    if (appData.measurements.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">Nenhum registro.</p>';
+        return;
+    }
+
+    appData.measurements.forEach((m, index) => {
+        const date = new Date(m.date + 'T12:00:00').toLocaleDateString('pt-BR');
+        const prev = appData.measurements[index + 1];
+        let diffHtml = '';
+        
+        if (prev) {
+            const diff = m.weight - prev.weight;
+            const color = diff > 0 ? 'text-red-500' : 'text-emerald-500';
+            const signal = diff > 0 ? '+' : '';
+            diffHtml = `<span class="text-xs font-bold ${color}">${signal}${diff.toFixed(1)}</span>`;
+        }
+
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl';
+        div.innerHTML = `
+            <div class="flex items-center gap-3">
+                <div class="size-8 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center font-bold text-xs text-primary shadow-sm">
+                    ${index + 1}
+                </div>
+                <div>
+                    <p class="font-bold text-sm">${m.weight.toFixed(1)} kg</p>
+                    <p class="text-[10px] text-gray-400 uppercase">${date}</p>
+                </div>
+            </div>
+            <div class="text-right">
+                ${diffHtml}
+                ${m.waist ? `<p class="text-[10px] text-gray-500">Cintura: ${m.waist}cm</p>` : ''}
+            </div>
+            <button onclick="deleteMeasurement(${m.id})" class="ml-2 p-2 text-gray-300 hover:text-red-500">
+                <span class="material-symbols-outlined text-lg">delete</span>
+            </button>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function deleteMeasurement(id) {
+    if(confirm('Apagar este registro?')) {
+        appData.measurements = appData.measurements.filter(m => m.id !== id);
+        saveData();
+        updateHistoryList();
+        updateHomeScreen();
+    }
+}
+
+// Funções de arquivo (Export/Import) mantidas simples
 function exportData() {
-    const dataStr = JSON.stringify(appData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `health-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const str = JSON.stringify(appData);
+    const blob = new Blob([str], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'backup_saude.json';
+    a.click();
 }
 
-function shareWhatsApp() {
-    const lastMeasurement = appData.measurements[0];
-    if (!lastMeasurement) {
-        alert('Nenhuma medida para compartilhar');
-        return;
-    }
-    
-    const profile = appData.profile;
-    const date = new Date(lastMeasurement.date).toLocaleDateString('pt-BR');
-    
-    let message = `*Relatório de Saúde: ${profile.name || 'Usuário'}*\n\n`;
-    message += `📅 *Data:* ${date}\n`;
-    message += `⚖️ *Peso:* ${lastMeasurement.weight.toFixed(1)} kg\n`;
-    if (lastMeasurement.waist) {
-        message += `📏 *Cintura:* ${lastMeasurement.waist} cm\n`;
-    }
-    if (profile.age) {
-        message += `🎂 *Idade:* ${profile.age} anos\n`;
-    }
-    
-    message += `\n📊 *Indicadores Científicos:*\n`;
-    
-    // IMC
-    if (profile.height) {
-        const heightM = profile.height / 100;
-        const bmi = lastMeasurement.weight / (heightM * heightM);
-        const bmiStatus = getBMIStatus(bmi);
-        message += `• *IMC:* ${bmi.toFixed(1)} (${bmiStatus})\n`;
-        
-        // RFM
-        if (lastMeasurement.waist) {
-            const rfm = calculateRFM(profile.height, lastMeasurement.waist, profile.gender);
-            message += `• *RFM (% Gordura):* ${rfm.toFixed(1)}% _(Cedars-Sinai)_\n`;
-            
-            // RCE
-            const whr = lastMeasurement.waist / profile.height;
-            message += `• *RCE (Cintura/Est.):* ${whr.toFixed(2)} (Meta: < 0.50)\n`;
-            
-            // Cardiovascular
-            const cvRisk = getCardiovascularRisk(lastMeasurement.waist, profile.gender);
-            message += `❤️ *Saúde Cardiovascular:* ${cvRisk.text}\n`;
-        }
-    }
-    
-    // Evolução
-    if (appData.measurements.length > 1) {
-        const first = appData.measurements[appData.measurements.length - 1];
-        const weightChange = lastMeasurement.weight - first.weight;
-        message += `\n📉 *Sua Evolução:*\n`;
-        message += `• Peso: ${weightChange > 0 ? '+' : ''}${weightChange.toFixed(1)} kg\n`;
-        
-        if (lastMeasurement.waist && first.waist) {
-            const waistChange = lastMeasurement.waist - first.waist;
-            message += `• Cintura: ${waistChange > 0 ? '+' : ''}${waistChange.toFixed(1)} cm\n`;
-        }
-    }
-    
-    message += `\n_Gerado pelo meu App de Saúde Metabólica_`;
-    
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-    window.open(whatsappUrl, '_blank');
-}
-
-function handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (file) {
-        document.getElementById('file-name').textContent = file.name;
-    }
-}
-
-function importData() {
-    const fileInput = document.getElementById('import-file');
-    const file = fileInput.files[0];
-    
-    if (!file) {
-        alert('Por favor, selecione um arquivo para importar');
-        return;
-    }
-    
+function importData(input) {
+    const file = input.files[0];
+    if(!file) return;
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = e => {
         try {
-            const importedData = JSON.parse(e.target.result);
-            
-            // Validar estrutura básica
-            if (!importedData.profile || !importedData.measurements) {
-                throw new Error('Formato de arquivo inválido');
-            }
-            
-            // Confirmar importação
-            if (confirm('Isso irá substituir todos os seus dados atuais. Deseja continuar?')) {
-                appData = importedData;
-                saveData();
-                alert('Dados importados com sucesso!');
-                showScreen('home-screen');
-            }
-        } catch (error) {
-            alert('Erro ao importar arquivo: ' + error.message);
-        }
+            appData = JSON.parse(e.target.result);
+            saveData();
+            alert('Restaurado com sucesso!');
+            location.reload();
+        } catch(err) { alert('Erro no arquivo'); }
     };
     reader.readAsText(file);
 }
 
-// ==============================================
-// PERSISTÊNCIA DE DADOS
-// ==============================================
-
-function saveData() {
-    localStorage.setItem('healthTrackerData', JSON.stringify(appData));
+function shareWhatsApp() {
+    if(appData.measurements.length === 0) return alert('Sem dados para compartilhar');
+    const m = appData.measurements[0];
+    const text = `Meu progresso hoje: ${m.weight}kg. Foco na meta! 🚀`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`);
 }
 
+// Persistência
+function saveData() { localStorage.setItem('healthTrackerData', JSON.stringify(appData)); }
 function loadData() {
-    const savedData = localStorage.getItem('healthTrackerData');
-    if (savedData) {
-        try {
-            appData = JSON.parse(savedData);
-        } catch (e) {
-            console.error('Erro ao carregar dados:', e);
-        }
-    }
+    const d = localStorage.getItem('healthTrackerData');
+    if (d) appData = JSON.parse(d);
 }
