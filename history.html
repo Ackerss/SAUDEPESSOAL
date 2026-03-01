@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html class="light" lang="pt-BR">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Peso">
     <link rel="manifest" href="manifest.json">
     <title>Histórico - Controle de Peso</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -32,7 +34,7 @@
                     fontFamily: {
                         "display": ["Quicksand", "sans-serif"]
                     },
-                    borderRadius: { 
+                    borderRadius: {
                         "super": "2rem",
                         "card": "1.25rem"
                     },
@@ -47,40 +49,52 @@
             background-color: #FAF9F6;
             min-height: max(884px, 100dvh);
         }
+
         .ios-blur {
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
         }
+
         .soft-shadow {
             box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.04);
         }
+
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
-        details > summary {
+
+        details>summary {
             list-style: none;
         }
-        details > summary::-webkit-details-marker {
+
+        details>summary::-webkit-details-marker {
             display: none;
         }
+
         details[open] .closed-view {
             display: none;
         }
+
         details:not([open]) .open-view {
             display: none;
         }
     </style>
 </head>
+
 <body class="text-text-main min-h-screen">
     <header class="sticky top-0 z-50 bg-[#FAF9F6]/80 ios-blur border-b border-orange-50">
         <div class="flex items-center justify-between px-4 h-14">
-            <button onclick="window.location.href='dashboard.html'" class="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm">
+            <button onclick="window.location.href='dashboard.html'"
+                class="w-8 h-8 flex items-center justify-center bg-white rounded-full shadow-sm">
                 <span class="material-symbols-outlined text-primary text-xl font-bold">grid_view</span>
             </button>
             <h1 class="text-lg font-bold tracking-tight text-text-main">Histórico</h1>
-            <button onclick="shareProgress()" class="w-8 h-8 flex items-center justify-center bg-whatsapp rounded-full shadow-sm text-white">
+            <button onclick="shareProgress()"
+                class="w-8 h-8 flex items-center justify-center bg-whatsapp rounded-full shadow-sm text-white">
                 <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path>
+                    <path
+                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z">
+                    </path>
                 </svg>
             </button>
         </div>
@@ -88,9 +102,14 @@
 
     <main class="max-w-md mx-auto pb-32">
         <div class="px-4 py-4 flex gap-2 overflow-x-auto no-scrollbar">
-            <button onclick="filterEntries('all')" id="filter-all" class="px-5 py-1.5 bg-primary text-white text-xs font-bold rounded-full whitespace-nowrap shadow-sm">Todos</button>
-            <button onclick="filterEntries(7)" id="filter-7" class="px-5 py-1.5 bg-white text-text-main/50 text-xs font-bold rounded-full whitespace-nowrap border border-orange-100">7 dias</button>
-            <button onclick="filterEntries(30)" id="filter-30" class="px-5 py-1.5 bg-white text-text-main/50 text-xs font-bold rounded-full whitespace-nowrap border border-orange-100">30 dias</button>
+            <button onclick="filterEntries('all')" id="filter-all"
+                class="px-5 py-1.5 bg-primary text-white text-xs font-bold rounded-full whitespace-nowrap shadow-sm">Todos</button>
+            <button onclick="filterEntries(7)" id="filter-7"
+                class="px-5 py-1.5 bg-white text-text-main/50 text-xs font-bold rounded-full whitespace-nowrap border border-orange-100">7
+                dias</button>
+            <button onclick="filterEntries(30)" id="filter-30"
+                class="px-5 py-1.5 bg-white text-text-main/50 text-xs font-bold rounded-full whitespace-nowrap border border-orange-100">30
+                dias</button>
         </div>
 
         <div id="entries-container" class="flex flex-col space-y-2 px-4">
@@ -108,25 +127,30 @@
         </div>
     </main>
 
-    <button onclick="window.location.href='add-entry.html'" class="fixed right-6 bottom-24 size-14 rounded-full bg-primary text-white shadow-lg shadow-primary/40 flex items-center justify-center active:scale-90 transition-transform z-50">
+    <button onclick="window.location.href='add-entry.html'"
+        class="fixed right-6 bottom-24 size-14 rounded-full bg-primary text-white shadow-lg shadow-primary/40 flex items-center justify-center active:scale-90 transition-transform z-50">
         <span class="material-symbols-outlined text-3xl">add</span>
     </button>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-white/90 ios-blur border-t border-orange-50 px-8 pb-8 pt-3 z-50">
         <div class="flex justify-between items-center max-w-md mx-auto">
-            <button onclick="window.location.href='dashboard.html'" class="flex flex-col items-center gap-0.5 text-gray-300">
+            <button onclick="window.location.href='dashboard.html'"
+                class="flex flex-col items-center gap-0.5 text-gray-300">
                 <span class="material-symbols-outlined text-2xl">grid_view</span>
                 <span class="text-[9px] font-bold uppercase">Início</span>
             </button>
-            <button onclick="window.location.href='history.html'" class="flex flex-col items-center gap-0.5 text-primary">
-                <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1">history</span>
+            <button onclick="window.location.href='history.html'"
+                class="flex flex-col items-center gap-0.5 text-primary">
+                <span class="material-symbols-outlined text-2xl"
+                    style="font-variation-settings: 'FILL' 1">history</span>
                 <span class="text-[9px] font-bold uppercase">Histórico</span>
             </button>
-            <button onclick="exportData()" class="flex flex-col items-center gap-0.5 text-gray-300">
+            <button onclick="showBackupMenu()" class="flex flex-col items-center gap-0.5 text-gray-300">
                 <span class="material-symbols-outlined text-2xl">database</span>
                 <span class="text-[9px] font-bold uppercase">Backup</span>
             </button>
-            <button onclick="window.location.href='profile.html'" class="flex flex-col items-center gap-0.5 text-gray-300">
+            <button onclick="window.location.href='profile.html'"
+                class="flex flex-col items-center gap-0.5 text-gray-300">
                 <span class="material-symbols-outlined text-2xl">person_2</span>
                 <span class="text-[9px] font-bold uppercase">Perfil</span>
             </button>
@@ -135,6 +159,8 @@
 
     <script src="storage.js"></script>
     <script src="calculations.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="app.js"></script>
 </body>
+
 </html>

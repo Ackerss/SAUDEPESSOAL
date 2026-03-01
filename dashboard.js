@@ -5,14 +5,14 @@ let waistChartPeriod = 'week';
 
 // ==================== INICIALIZAÇÃO ====================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadDashboard();
 });
 
 function loadDashboard() {
     const profile = getProfile();
     const entries = getEntriesSorted();
-    const latest = getLatestEntry();
+    const latest = getLatestEntry() || { weight: profile?.currentWeight || profile?.targetWeight || 0 };
 
     // Verificar se tem perfil configurado
     if (!profile || !profile.height || !profile.gender) {
@@ -20,14 +20,16 @@ function loadDashboard() {
         return;
     }
 
-    // Verificar se tem registros
+    loadUserInfo(profile);
+    loadInsights(latest, profile);
+
+    // Verificar se tem registros para o resto do dashboard
     if (entries.length === 0) {
         showFirstEntryPrompt();
         return;
     }
 
-    // Carregar dados
-    loadUserInfo(profile);
+    // Carregar dados avançados
     loadSummaryCards(latest, entries, profile);
     loadMetabolicHealth(latest, profile);
     loadWeightChart();
@@ -56,7 +58,7 @@ function loadSummaryCards(latest, entries, profile) {
     if (entries.length > 1) {
         const previousWeight = entries[1].weight;
         const change = latest.weight - previousWeight;
-        
+
         if (change < 0) {
             weightChangeEl.innerHTML = `
                 <span class="material-symbols-outlined text-sm text-emerald-500">trending_down</span>
@@ -77,12 +79,12 @@ function loadSummaryCards(latest, entries, profile) {
     // IMC
     const currentBmiEl = document.getElementById('current-bmi');
     const bmiCategoryEl = document.getElementById('bmi-category');
-    
+
     currentBmiEl.textContent = formatBMI(latest.bmi);
-    
+
     const category = getBMICategory(latest.bmi);
     let categoryClass = '';
-    
+
     if (latest.bmi < 18.5) {
         categoryClass = 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
     } else if (latest.bmi < 25) {
@@ -92,19 +94,73 @@ function loadSummaryCards(latest, entries, profile) {
     } else {
         categoryClass = 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400';
     }
-    
+
     bmiCategoryEl.className = `inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold w-fit uppercase ${categoryClass}`;
     bmiCategoryEl.textContent = category;
 
     // Total Eliminado (peso)
     const progress = getWeightProgress();
     const totalLostEl = document.getElementById('total-weight-lost');
-    
+
     if (progress && progress.change !== 0) {
         const sign = progress.change < 0 ? '' : '+';
         totalLostEl.innerHTML = `${sign}${formatWeight(progress.change)}<span class="text-xs font-medium text-gray-400 ml-0.5">kg</span>`;
     } else {
         totalLostEl.innerHTML = `0<span class="text-xs font-medium text-gray-400 ml-0.5">kg</span>`;
+    }
+}
+
+// ==================== INSIGHTS ====================
+
+function loadInsights(latest, profile) {
+    const insightCard = document.getElementById('insight-card');
+    const insightIcon = document.getElementById('insight-icon');
+    const insightText = document.getElementById('insight-text');
+
+    if (!profile.targetWeight) {
+        insightText.textContent = "Defina uma meta de peso no seu perfil para receber análises.";
+        return;
+    }
+
+    const startWeight = profile.currentWeight || latest.weight; // Fallback se não tiver
+    const targetWeight = profile.targetWeight;
+
+    // Calcula progresso
+    const totalToLose = startWeight - targetWeight;
+    const currentLost = startWeight - latest.weight;
+    let progress = 0;
+
+    if (totalToLose > 0 && currentLost > 0) {
+        progress = (currentLost / totalToLose) * 100;
+    } else if (totalToLose < 0 && currentLost < 0) { // Goal is gain weight
+        progress = (currentLost / totalToLose) * 100;
+    }
+
+    if (progress > 100) progress = 100;
+    if (progress < 0) progress = 0;
+
+    const diff = latest.weight - startWeight;
+
+    if (progress >= 100) {
+        insightText.textContent = "Incrível! Você alcançou o seu peso alvo. Consulte um especialista para manter a manutenção.";
+        insightCard.className = "bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border-l-4 border-emerald-500 flex gap-4 items-center transition-all";
+        insightIcon.className = "flex items-center justify-center size-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 shrink-0";
+        insightIcon.innerHTML = '<span class="material-symbols-outlined">trophy</span>';
+    } else if (progress > 50) {
+        insightText.textContent = "Muito bem! Você já passou da metade do caminho para a sua meta principal.";
+        insightCard.className = "bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border-l-4 border-primary flex gap-4 items-center transition-all";
+        insightIcon.className = "flex items-center justify-center size-10 rounded-full bg-primary/10 text-primary shrink-0";
+        insightIcon.innerHTML = '<span class="material-symbols-outlined text-primary">star</span>';
+    } else if (diff < 0) {
+        insightText.textContent = "Bom trabalho, você está perdendo peso. Continue o acompanhamento constante.";
+        insightCard.className = "bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border-l-4 border-blue-500 flex gap-4 items-center transition-all";
+        insightIcon.className = "flex items-center justify-center size-10 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-500 shrink-0";
+        insightIcon.innerHTML = '<span class="material-symbols-outlined">trending_down</span>';
+    } else {
+        insightText.textContent = "Mantenha o foco! Registre seu peso e cintura regularmente para acompanhar sua evolução.";
+        insightCard.className = "bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border-l-4 border-gray-400 flex gap-4 items-center transition-all";
+        insightIcon.className = "flex items-center justify-center size-10 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 shrink-0";
+        insightIcon.innerHTML = '<span class="material-symbols-outlined">lightbulb</span>';
     }
 }
 
@@ -117,13 +173,13 @@ function loadMetabolicHealth(latest, profile) {
         const rceEl = document.getElementById('rce-value');
         const rceStatusEl = document.getElementById('rce-status');
         const rceMarkerEl = document.getElementById('rce-marker');
-        
+
         rceEl.textContent = rce.toFixed(2);
-        
+
         // Posição do marcador (0.5 = 50%)
         const position = Math.min(100, (rce / 0.7) * 100);
         rceMarkerEl.style.left = `${position}%`;
-        
+
         // Status
         if (rce < 0.5) {
             rceStatusEl.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 uppercase';
@@ -146,9 +202,9 @@ function loadMetabolicHealth(latest, profile) {
         const rfmEl = document.getElementById('rfm-value');
         const rfmStatusEl = document.getElementById('rfm-status');
         const rfmMarkerEl = document.getElementById('rfm-marker');
-        
+
         rfmEl.innerHTML = `${rfm.toFixed(1)}<span class="text-base">%</span>`;
-        
+
         // Posição do marcador
         let position;
         if (profile.gender === 'male') {
@@ -157,11 +213,11 @@ function loadMetabolicHealth(latest, profile) {
             position = Math.min(100, (rfm / 40) * 100);
         }
         rfmMarkerEl.style.left = `${position}%`;
-        
+
         // Status baseado no gênero
         let statusClass = '';
         let statusText = '';
-        
+
         if (profile.gender === 'male') {
             if (rfm < 14) {
                 statusClass = 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400';
@@ -191,7 +247,7 @@ function loadMetabolicHealth(latest, profile) {
                 statusText = 'ELEVADO';
             }
         }
-        
+
         rfmStatusEl.className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${statusClass} uppercase`;
         rfmStatusEl.textContent = statusText;
     } else {
@@ -203,7 +259,7 @@ function loadMetabolicHealth(latest, profile) {
 // Calcular RFM
 function calculateRFM(waist, heightCm, gender) {
     const height = heightCm / 100; // converter para metros
-    
+
     if (gender === 'male') {
         return 64 - (20 * height / waist) + (12 * 1); // 1 = idade fictícia normalizada
     } else {
@@ -219,12 +275,12 @@ function loadAbdominalRisk(latest, profile) {
     const waistRiskBadgeEl = document.getElementById('waist-risk-badge');
     const waistRiskMarkerEl = document.getElementById('waist-risk-marker');
     const waistRiskInfoEl = document.getElementById('waist-risk-info');
-    
+
     let risk = '';
     let position = 0;
     let badgeClass = '';
     let infoText = '';
-    
+
     if (profile.gender === 'male') {
         if (latest.waist < 94) {
             risk = 'BAIXO';
@@ -260,24 +316,24 @@ function loadAbdominalRisk(latest, profile) {
             infoText = `Atenção! Risco cardiovascular elevado. Busque reduzir a cintura para abaixo de 80cm.`;
         }
     }
-    
+
     waistRiskBadgeEl.className = `text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeClass} uppercase`;
     waistRiskBadgeEl.textContent = risk;
     waistRiskMarkerEl.style.left = `${position}%`;
     waistRiskInfoEl.textContent = infoText;
-    
+
     // Cintura Atual
     document.getElementById('summary-current-waist').innerHTML = `${latest.waist}<span class="text-xs font-medium text-gray-400 ml-0.5">cm</span>`;
-    
+
     // Total Eliminado (cintura)
     const entries = getEntriesSorted(false);
     const entriesWithWaist = entries.filter(e => e.waist);
-    
+
     if (entriesWithWaist.length > 1) {
         const firstWaist = entriesWithWaist[0].waist;
         const currentWaist = latest.waist;
         const change = currentWaist - firstWaist;
-        
+
         const totalWaistLostEl = document.getElementById('total-waist-lost');
         const sign = change < 0 ? '' : '+';
         totalWaistLostEl.innerHTML = `${sign}${change.toFixed(1)}<span class="text-xs font-medium text-gray-400 ml-0.5">cm</span>`;
@@ -288,27 +344,27 @@ function loadAbdominalRisk(latest, profile) {
 
 function changeWeightPeriod(period) {
     weightChartPeriod = period;
-    
+
     // Atualizar botões
     document.getElementById('weight-week').className = 'px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase';
     document.getElementById('weight-month').className = 'px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase';
     document.getElementById('weight-all').className = 'px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase';
-    
+
     document.getElementById(`weight-${period}`).className = 'px-3 py-1 text-[10px] font-bold rounded-md bg-white dark:bg-gray-600 shadow-sm text-primary';
-    
+
     loadWeightChart();
 }
 
 function changeWaistPeriod(period) {
     waistChartPeriod = period;
-    
+
     // Atualizar botões
     document.getElementById('waist-week').className = 'px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase';
     document.getElementById('waist-month').className = 'px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase';
     document.getElementById('waist-all').className = 'px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase';
-    
+
     document.getElementById(`waist-${period}`).className = 'px-3 py-1 text-[10px] font-bold rounded-md bg-white dark:bg-gray-600 shadow-sm text-accent-blue';
-    
+
     loadWaistChart();
 }
 
@@ -317,7 +373,7 @@ function changeWaistPeriod(period) {
 function loadWeightChart() {
     const entries = getEntriesSorted(false); // Mais antigos primeiro
     let filteredEntries = [];
-    
+
     if (weightChartPeriod === 'week') {
         filteredEntries = entries.slice(-7);
     } else if (weightChartPeriod === 'month') {
@@ -325,14 +381,14 @@ function loadWeightChart() {
     } else {
         filteredEntries = entries;
     }
-    
+
     const weights = filteredEntries.map(e => e.weight);
     const labels = filteredEntries.map(e => {
         const date = new Date(e.date + 'T00:00:00');
         const weekday = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][date.getDay()];
         return weekday;
     });
-    
+
     drawWeightChart(weights, labels);
     updateWeightLabels(labels, filteredEntries);
 }
@@ -340,7 +396,7 @@ function loadWeightChart() {
 function loadWaistChart() {
     const entries = getEntriesSorted(false).filter(e => e.waist); // Apenas com cintura
     let filteredEntries = [];
-    
+
     if (waistChartPeriod === 'week') {
         filteredEntries = entries.slice(-7);
     } else if (waistChartPeriod === 'month') {
@@ -348,14 +404,14 @@ function loadWaistChart() {
     } else {
         filteredEntries = entries;
     }
-    
+
     const waists = filteredEntries.map(e => e.waist);
     const labels = filteredEntries.map(e => {
         const date = new Date(e.date + 'T00:00:00');
         const weekday = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'][date.getDay()];
         return weekday;
     });
-    
+
     drawWaistChart(waists, labels);
     updateWaistLabels(labels, filteredEntries);
 }
@@ -363,30 +419,30 @@ function loadWaistChart() {
 function updateWeightLabels(labels, entries) {
     const container = document.getElementById('weight-labels');
     const today = new Date().getDay();
-    
+
     container.innerHTML = labels.map((label, i) => {
         const isToday = i === entries.length - 1;
-        const className = isToday 
+        const className = isToday
             ? 'flex flex-col items-center gap-1 flex-1'
             : 'flex flex-col items-center gap-1 flex-1';
         const spanClass = isToday
             ? 'text-[10px] font-bold bg-primary/10 px-1.5 py-0.5 rounded text-primary uppercase'
             : 'text-[10px] font-bold bg-gray-50 dark:bg-gray-700/50 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400 uppercase';
-        
+
         return `<div class="${className}"><span class="${spanClass}">${label}</span></div>`;
     }).join('');
 }
 
 function updateWaistLabels(labels, entries) {
     const container = document.getElementById('waist-labels');
-    
+
     container.innerHTML = labels.map((label, i) => {
         const isToday = i === entries.length - 1;
         const className = 'flex flex-col items-center gap-1 flex-1';
         const spanClass = isToday
             ? 'text-[10px] font-bold bg-accent-blue/10 px-1.5 py-0.5 rounded text-accent-blue uppercase'
             : 'text-[10px] font-bold bg-gray-50 dark:bg-gray-700/50 px-1.5 py-0.5 rounded text-gray-500 dark:text-gray-400 uppercase';
-        
+
         return `<div class="${className}"><span class="${spanClass}">${label}</span></div>`;
     }).join('');
 }
@@ -394,13 +450,33 @@ function updateWaistLabels(labels, entries) {
 // ==================== PROMPTS ====================
 
 function showConfigurationPrompt() {
-    if (confirm('Configure seu perfil primeiro para ver o dashboard completo!')) {
-        window.location.href = 'profile.html';
-    }
+    Swal.fire({
+        title: 'Bem-vindo(a)!',
+        text: 'Configure seu perfil primeiro para ver o dashboard completo!',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Configurar',
+        cancelButtonText: 'Depois',
+        confirmButtonColor: '#10b981'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'profile.html';
+        }
+    });
 }
 
 function showFirstEntryPrompt() {
-    if (confirm('Adicione seu primeiro registro de peso para começar!')) {
-        window.location.href = 'add-entry.html';
-    }
+    Swal.fire({
+        title: 'Quase lá!',
+        text: 'Adicione seu primeiro registro de peso para começar!',
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Adicionar',
+        cancelButtonText: 'Depois',
+        confirmButtonColor: '#10b981'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = 'add-entry.html';
+        }
+    });
 }

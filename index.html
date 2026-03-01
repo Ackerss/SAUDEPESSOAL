@@ -1,21 +1,24 @@
 <!DOCTYPE html>
 <html class="light" lang="pt-BR">
+
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="manifest" href="manifest.json">
     <title>Controle de Peso - Dashboard</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#ff7857",
+                        "primary": "#10b981",
                         "accent-blue": "#06b6d4",
                         "background-light": "#fafaf9",
                         "background-dark": "#1a1c22",
@@ -34,35 +37,43 @@
         }
     </script>
     <style>
-        body { 
+        body {
             font-family: 'Lexend', sans-serif;
             min-height: max(884px, 100dvh);
         }
+
         .bmi-gradient {
             background: linear-gradient(to right, #60a5fa 0%, #3CC7B2 25%, #FFD966 50%, #fb923c 75%, #ef4444 100%);
         }
+
         .waist-gradient {
             background: linear-gradient(to right, #10b981 0%, #facc15 50%, #ef4444 100%);
         }
+
         .metabolic-gradient {
             background: linear-gradient(to right, #10b981 0%, #10b981 50%, #facc15 65%, #ef4444 100%);
         }
+
         .rfm-gradient {
             background: linear-gradient(to right, #60a5fa 0%, #10b981 20%, #facc15 60%, #ef4444 100%);
         }
     </style>
 </head>
+
 <body class="bg-background-light dark:bg-background-dark text-[#1d100c] dark:text-gray-100 min-h-screen pb-32">
     <div class="sticky top-0 z-20 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
         <div class="flex items-center p-4 pb-2 justify-between">
-            <div class="flex size-10 shrink-0 items-center overflow-hidden rounded-full border-2 border-primary/20 bg-primary/10">
+            <div
+                class="flex size-10 shrink-0 items-center overflow-hidden rounded-full border-2 border-primary/20 bg-primary/10">
                 <div class="size-full flex items-center justify-center">
                     <span class="material-symbols-outlined text-primary text-2xl">person</span>
                 </div>
             </div>
-            <h2 class="text-[#1d100c] dark:text-white text-lg font-bold leading-tight tracking-tight flex-1 px-3">Dashboard</h2>
+            <h2 class="text-[#1d100c] dark:text-white text-lg font-bold leading-tight tracking-tight flex-1 px-3">
+                Dashboard</h2>
             <div class="flex gap-2 items-center">
-                <button onclick="window.location.href='profile.html'" class="flex size-10 cursor-pointer items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-sm">
+                <button onclick="window.location.href='profile.html'"
+                    class="flex size-10 cursor-pointer items-center justify-center rounded-full bg-white dark:bg-gray-800 shadow-sm">
                     <span class="material-symbols-outlined text-gray-600 dark:text-gray-300">settings</span>
                 </button>
             </div>
@@ -77,32 +88,54 @@
 
         <!-- Cards de Resumo -->
         <div class="flex flex-wrap gap-4 p-4">
-            <div class="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl p-5 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
+            <div
+                class="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl p-5 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
                 <div class="flex items-center gap-2 mb-1">
                     <span class="material-symbols-outlined text-primary text-xl">monitor_weight</span>
-                    <p class="text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-wider">PESO ATUAL</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-wider">PESO
+                        ATUAL</p>
                 </div>
-                <p id="current-weight" class="text-[#1d100c] dark:text-white tracking-tight text-3xl font-bold">-<span class="text-lg ml-1 font-medium text-gray-400">kg</span></p>
+                <p id="current-weight" class="text-[#1d100c] dark:text-white tracking-tight text-3xl font-bold">-<span
+                        class="text-lg ml-1 font-medium text-gray-400">kg</span></p>
                 <div id="weight-change" class="flex items-center gap-1 text-xs font-bold">
                     <!-- Será preenchido dinamicamente -->
                 </div>
             </div>
 
-            <div class="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl p-5 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
+            <div
+                class="flex min-w-[140px] flex-1 flex-col gap-1 rounded-xl p-5 bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700">
                 <div class="flex items-center gap-2 mb-1">
                     <span class="material-symbols-outlined text-emerald-500 text-xl">health_metrics</span>
                     <p class="text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase tracking-wider">IMC</p>
                 </div>
                 <p id="current-bmi" class="text-[#1d100c] dark:text-white tracking-tight text-3xl font-bold">-</p>
-                <div id="bmi-category" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold w-fit uppercase">
+                <div id="bmi-category"
+                    class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold w-fit uppercase">
                     -
+                </div>
+            </div>
+        </div>
+
+        <!-- Previsão e Insights -->
+        <div class="px-4 mb-4">
+            <div id="insight-card"
+                class="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border-l-4 border-gray-400 flex gap-4 items-center transition-all">
+                <div id="insight-icon"
+                    class="flex items-center justify-center size-10 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-500 shrink-0">
+                    <span class="material-symbols-outlined">lightbulb</span>
+                </div>
+                <div>
+                    <h4 class="text-[#1d100c] dark:text-white font-bold text-sm">Insight de Saúde</h4>
+                    <p id="insight-text" class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Adicione mais registros
+                        para receber análises personalizadas sobre sua evolução.</p>
                 </div>
             </div>
         </div>
 
         <!-- Saúde Metabólica -->
         <div class="px-4 mb-4">
-            <div class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-primary/20 dark:border-gray-700 overflow-hidden">
+            <div
+                class="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm border border-primary/20 dark:border-gray-700 overflow-hidden">
                 <div class="flex items-center gap-2 mb-6">
                     <span class="material-symbols-outlined text-primary text-2xl">vital_signs</span>
                     <h4 class="text-[#1d100c] dark:text-white font-bold text-lg">Saúde Metabólica</h4>
@@ -112,7 +145,8 @@
                 <div class="mb-8">
                     <div class="flex justify-between items-end mb-2">
                         <div>
-                            <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">RCE (Cintura/Estatura)</p>
+                            <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">RCE
+                                (Cintura/Estatura)</p>
                             <p id="rce-value" class="text-2xl font-bold text-[#1d100c] dark:text-white">-</p>
                         </div>
                         <div class="text-right">
@@ -121,7 +155,9 @@
                         </div>
                     </div>
                     <div class="relative h-2.5 w-full rounded-full metabolic-gradient mb-1">
-                        <div id="rce-marker" class="absolute top-0 h-4 w-1.5 bg-[#1d100c] dark:bg-white -mt-[3px] rounded-full shadow-md z-10" style="left: 0%;"></div>
+                        <div id="rce-marker"
+                            class="absolute top-0 h-4 w-1.5 bg-[#1d100c] dark:bg-white -mt-[3px] rounded-full shadow-md z-10"
+                            style="left: 0%;"></div>
                     </div>
                     <div class="flex justify-between text-[10px] text-gray-400 font-medium px-0.5">
                         <span>Ótimo</span>
@@ -136,9 +172,12 @@
                         <div class="flex items-center gap-1.5">
                             <div>
                                 <div class="flex items-center gap-1">
-                                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">Gordura Relativa (RFM)</p>
+                                    <p
+                                        class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">
+                                        Gordura Relativa (RFM)</p>
                                 </div>
-                                <p id="rfm-value" class="text-2xl font-bold text-[#1d100c] dark:text-white">-<span class="text-base">%</span></p>
+                                <p id="rfm-value" class="text-2xl font-bold text-[#1d100c] dark:text-white">-<span
+                                        class="text-base">%</span></p>
                             </div>
                         </div>
                         <div class="text-right">
@@ -146,7 +185,9 @@
                         </div>
                     </div>
                     <div class="relative h-2.5 w-full rounded-full rfm-gradient mb-1">
-                        <div id="rfm-marker" class="absolute top-0 h-4 w-1.5 bg-[#1d100c] dark:bg-white -mt-[3px] rounded-full shadow-md z-10" style="left: 0%;"></div>
+                        <div id="rfm-marker"
+                            class="absolute top-0 h-4 w-1.5 bg-[#1d100c] dark:bg-white -mt-[3px] rounded-full shadow-md z-10"
+                            style="left: 0%;"></div>
                     </div>
                     <div class="flex justify-between text-[10px] text-gray-400 font-medium px-0.5">
                         <span>Atleta</span>
@@ -164,9 +205,12 @@
                 <div class="flex justify-between items-center mb-6">
                     <h4 class="text-[#1d100c] dark:text-white font-bold">Evolução de Peso</h4>
                     <div class="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
-                        <button onclick="changeWeightPeriod('week')" id="weight-week" class="px-3 py-1 text-[10px] font-bold rounded-md bg-white dark:bg-gray-600 shadow-sm text-primary">SEMANA</button>
-                        <button onclick="changeWeightPeriod('month')" id="weight-month" class="px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase">MÊS</button>
-                        <button onclick="changeWeightPeriod('all')" id="weight-all" class="px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase">TUDO</button>
+                        <button onclick="changeWeightPeriod('week')" id="weight-week"
+                            class="px-3 py-1 text-[10px] font-bold rounded-md bg-white dark:bg-gray-600 shadow-sm text-primary">SEMANA</button>
+                        <button onclick="changeWeightPeriod('month')" id="weight-month"
+                            class="px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase">MÊS</button>
+                        <button onclick="changeWeightPeriod('all')" id="weight-all"
+                            class="px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase">TUDO</button>
                     </div>
                 </div>
                 <div class="relative h-32 w-full flex flex-col justify-end">
@@ -177,13 +221,17 @@
                 </div>
             </div>
             <div class="flex gap-4 mt-3">
-                <div class="flex-1 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div
+                    class="flex-1 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                     <p class="text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase mb-1">Peso Atual</p>
-                    <p id="summary-current-weight" class="text-[#1d100c] dark:text-white text-xl font-bold">-<span class="text-xs font-medium text-gray-400 ml-0.5">kg</span></p>
+                    <p id="summary-current-weight" class="text-[#1d100c] dark:text-white text-xl font-bold">-<span
+                            class="text-xs font-medium text-gray-400 ml-0.5">kg</span></p>
                 </div>
-                <div class="flex-1 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div
+                    class="flex-1 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                     <p class="text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase mb-1">Total Eliminado</p>
-                    <p id="total-weight-lost" class="text-primary text-xl font-bold">-<span class="text-xs font-medium text-gray-400 ml-0.5">kg</span></p>
+                    <p id="total-weight-lost" class="text-primary text-xl font-bold">-<span
+                            class="text-xs font-medium text-gray-400 ml-0.5">kg</span></p>
                 </div>
             </div>
         </div>
@@ -192,11 +240,15 @@
         <div class="px-4 mb-4">
             <div class="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
                 <div class="flex justify-between items-center mb-6">
-                    <h4 class="text-[#1d100c] dark:text-white font-bold leading-tight">Evolução da<br/>Cintura (cm)</h4>
+                    <h4 class="text-[#1d100c] dark:text-white font-bold leading-tight">Evolução da<br />Cintura (cm)
+                    </h4>
                     <div class="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg h-fit">
-                        <button onclick="changeWaistPeriod('week')" id="waist-week" class="px-3 py-1 text-[10px] font-bold rounded-md bg-white dark:bg-gray-600 shadow-sm text-accent-blue">SEMANA</button>
-                        <button onclick="changeWaistPeriod('month')" id="waist-month" class="px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase">MÊS</button>
-                        <button onclick="changeWaistPeriod('all')" id="waist-all" class="px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase">TUDO</button>
+                        <button onclick="changeWaistPeriod('week')" id="waist-week"
+                            class="px-3 py-1 text-[10px] font-bold rounded-md bg-white dark:bg-gray-600 shadow-sm text-accent-blue">SEMANA</button>
+                        <button onclick="changeWaistPeriod('month')" id="waist-month"
+                            class="px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase">MÊS</button>
+                        <button onclick="changeWaistPeriod('all')" id="waist-all"
+                            class="px-3 py-1 text-[10px] font-bold rounded-md text-gray-500 dark:text-gray-400 uppercase">TUDO</button>
                     </div>
                 </div>
                 <div class="relative h-32 w-full flex flex-col justify-end">
@@ -207,13 +259,17 @@
                 </div>
             </div>
             <div class="flex gap-4 mt-3">
-                <div class="flex-1 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div
+                    class="flex-1 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                     <p class="text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase mb-1">Cintura Atual</p>
-                    <p id="summary-current-waist" class="text-[#1d100c] dark:text-white text-xl font-bold">-<span class="text-xs font-medium text-gray-400 ml-0.5">cm</span></p>
+                    <p id="summary-current-waist" class="text-[#1d100c] dark:text-white text-xl font-bold">-<span
+                            class="text-xs font-medium text-gray-400 ml-0.5">cm</span></p>
                 </div>
-                <div class="flex-1 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                <div
+                    class="flex-1 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                     <p class="text-gray-500 dark:text-gray-400 text-[10px] font-bold uppercase mb-1">Total Eliminado</p>
-                    <p id="total-waist-lost" class="text-accent-blue text-xl font-bold">-<span class="text-xs font-medium text-gray-400 ml-0.5">cm</span></p>
+                    <p id="total-waist-lost" class="text-accent-blue text-xl font-bold">-<span
+                            class="text-xs font-medium text-gray-400 ml-0.5">cm</span></p>
                 </div>
             </div>
         </div>
@@ -229,11 +285,15 @@
                 </div>
                 <div class="mb-4">
                     <div class="flex justify-between items-center mb-1.5">
-                        <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">Risco por Medida</p>
-                        <span id="waist-risk-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">-</span>
+                        <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-tight">Risco por
+                            Medida</p>
+                        <span id="waist-risk-badge"
+                            class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">-</span>
                     </div>
                     <div class="relative h-2 w-full rounded-full waist-gradient mb-1">
-                        <div id="waist-risk-marker" class="absolute top-0 h-4 w-1 bg-[#1d100c] dark:bg-white -mt-1 rounded-full shadow-md" style="left: 0%;"></div>
+                        <div id="waist-risk-marker"
+                            class="absolute top-0 h-4 w-1 bg-[#1d100c] dark:bg-white -mt-1 rounded-full shadow-md"
+                            style="left: 0%;"></div>
                     </div>
                 </div>
                 <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3 flex gap-3">
@@ -246,24 +306,29 @@
         </div>
     </main>
 
-    <button onclick="window.location.href='add-entry.html'" class="fixed bottom-24 right-6 size-16 bg-primary text-white rounded-full shadow-lg shadow-primary/40 flex items-center justify-center z-30 active:scale-95 transition-transform">
+    <button onclick="window.location.href='add-entry.html'"
+        class="fixed bottom-24 right-6 size-16 bg-primary text-white rounded-full shadow-lg shadow-primary/40 flex items-center justify-center z-30 active:scale-95 transition-transform">
         <span class="material-symbols-outlined text-3xl font-bold">add</span>
     </button>
 
-    <nav class="fixed bottom-0 w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-t border-gray-100 dark:border-gray-800 px-6 py-3 pb-8 flex justify-between items-center z-40">
-        <div onclick="window.location.href='index.html'" class="flex flex-col items-center gap-1 text-primary cursor-pointer">
+    <nav
+        class="fixed bottom-0 w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-lg border-t border-gray-100 dark:border-gray-800 px-6 py-3 pb-8 flex justify-between items-center z-40">
+        <div onclick="window.location.href='index.html'"
+            class="flex flex-col items-center gap-1 text-primary cursor-pointer">
             <span class="material-symbols-outlined text-2xl fill-current">grid_view</span>
             <span class="text-[10px] font-bold uppercase">Início</span>
         </div>
-        <div onclick="window.location.href='history.html'" class="flex flex-col items-center gap-1 text-gray-400 cursor-pointer">
+        <div onclick="window.location.href='history.html'"
+            class="flex flex-col items-center gap-1 text-gray-400 cursor-pointer">
             <span class="material-symbols-outlined text-2xl">history</span>
             <span class="text-[10px] font-bold uppercase tracking-tight">Histórico</span>
         </div>
-        <div onclick="exportData()" class="flex flex-col items-center gap-1 text-gray-400 cursor-pointer">
+        <div onclick="showBackupMenu()" class="flex flex-col items-center gap-1 text-gray-400 cursor-pointer">
             <span class="material-symbols-outlined text-2xl">database</span>
             <span class="text-[10px] font-bold uppercase tracking-tight">Backup</span>
         </div>
-        <div onclick="window.location.href='profile.html'" class="flex flex-col items-center gap-1 text-gray-400 cursor-pointer">
+        <div onclick="window.location.href='profile.html'"
+            class="flex flex-col items-center gap-1 text-gray-400 cursor-pointer">
             <span class="material-symbols-outlined text-2xl">person</span>
             <span class="text-[10px] font-bold uppercase tracking-tight">Perfil</span>
         </div>
@@ -272,6 +337,8 @@
     <script src="storage.js"></script>
     <script src="calculations.js"></script>
     <script src="charts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="dashboard.js"></script>
 </body>
+
 </html>

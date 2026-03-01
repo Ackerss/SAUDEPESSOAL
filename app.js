@@ -4,7 +4,7 @@ let currentFilter = 'all';
 
 // ==================== INICIALIZAÇÃO ====================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Verificar se está na página do histórico
     if (document.getElementById('entries-container')) {
         loadEntries();
@@ -17,29 +17,29 @@ document.addEventListener('DOMContentLoaded', function() {
 function loadEntries() {
     const container = document.getElementById('entries-container');
     const emptyState = document.getElementById('empty-state');
-    
+
     let entries;
-    
+
     if (currentFilter === 'all') {
         entries = getEntriesSorted();
     } else {
         entries = getEntriesFiltered(currentFilter);
     }
-    
+
     if (entries.length === 0) {
         container.innerHTML = '';
         emptyState.classList.remove('hidden');
         return;
     }
-    
+
     emptyState.classList.add('hidden');
     container.innerHTML = '';
-    
+
     entries.forEach((entry, index) => {
         const entryElement = createEntryElement(entry, index === 0);
         container.appendChild(entryElement);
     });
-    
+
     // Adicionar listener para fechar outros detalhes quando um é aberto
     addDetailsListeners();
 }
@@ -48,10 +48,10 @@ function createEntryElement(entry, isFirst) {
     const details = document.createElement('details');
     details.className = 'bg-white rounded-card soft-shadow border border-orange-50/50 group overflow-hidden';
     if (isFirst) details.setAttribute('open', '');
-    
+
     const dateFormatted = formatDateShort(entry.date);
     const riskColor = getRiskColor(entry.risk || 'Baixo');
-    
+
     details.innerHTML = `
         <summary class="cursor-pointer list-none">
             <div class="p-3 flex items-center gap-4 closed-view">
@@ -121,6 +121,16 @@ function createEntryElement(entry, isFirst) {
                 </div>
             </div>
         </div>
+        ${entry.note ? `
+        <div class="px-6 pb-2 open-view">
+            <div class="bg-gray-50 border border-gray-100 rounded-lg p-3 text-sm text-gray-600 block dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300">
+                <div class="flex gap-2 items-start">
+                    <span class="material-symbols-outlined text-gray-400 text-[16px] mt-0.5">sticky_note_2</span>
+                    <p class="italic">"${entry.note}"</p>
+                </div>
+            </div>
+        </div>
+        ` : ''}
         <div class="px-6 pb-6 flex justify-end gap-6 open-view">
             <button onclick="editEntry('${entry.id}')" class="flex items-center gap-1.5 text-gray-400 hover:text-gray-600">
                 <span class="material-symbols-outlined text-lg">edit</span>
@@ -132,7 +142,7 @@ function createEntryElement(entry, isFirst) {
             </button>
         </div>
     `;
-    
+
     return details;
 }
 
@@ -156,20 +166,20 @@ function addDetailsListeners() {
 
 function filterEntries(filter) {
     currentFilter = filter;
-    
+
     // Atualizar botões
     const buttons = {
         'all': document.getElementById('filter-all'),
         7: document.getElementById('filter-7'),
         30: document.getElementById('filter-30')
     };
-    
+
     Object.values(buttons).forEach(btn => {
         btn.className = 'px-5 py-1.5 bg-white text-text-main/50 text-xs font-bold rounded-full whitespace-nowrap border border-orange-100';
     });
-    
+
     buttons[filter].className = 'px-5 py-1.5 bg-primary text-white text-xs font-bold rounded-full whitespace-nowrap shadow-sm';
-    
+
     loadEntries();
 }
 
@@ -178,9 +188,9 @@ function filterEntries(filter) {
 function updateStreakInfo() {
     const streakContainer = document.getElementById('streak-info');
     if (!streakContainer) return;
-    
+
     const streak = getStreak();
-    
+
     if (streak > 1) {
         streakContainer.innerHTML = `
             <p class="text-xs text-text-main/40 font-medium">
@@ -206,11 +216,23 @@ function editEntry(id) {
 }
 
 function confirmDeleteEntry(id) {
-    if (confirm('Tem certeza que deseja apagar este registro?')) {
-        deleteEntry(id);
-        loadEntries();
-        updateStreakInfo();
-    }
+    Swal.fire({
+        title: 'Apagar registro?',
+        text: "Você não poderá reverter esta ação!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#F44336',
+        cancelButtonColor: '#9CA3AF',
+        confirmButtonText: 'Sim, apagar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            deleteEntry(id);
+            loadEntries();
+            updateStreakInfo();
+            Swal.fire('Apagado!', 'O registro foi removido.', 'success');
+        }
+    });
 }
 
 function shareProgress() {
@@ -224,24 +246,31 @@ function showImportModal() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'application/json';
-    
+
     input.onchange = (e) => {
         const file = e.target.files[0];
         const reader = new FileReader();
-        
+
         reader.onload = (event) => {
             const success = importData(event.target.result);
             if (success) {
-                alert('Dados importados com sucesso!');
-                window.location.reload();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Importação Concluída',
+                    text: 'Dados importados com sucesso!',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    window.location.reload();
+                });
             } else {
-                alert('Erro ao importar dados. Verifique o arquivo.');
+                Swal.fire('Erro', 'Arquivo de backup inválido ou corrompido.', 'error');
             }
         };
-        
+
         reader.readAsText(file);
     };
-    
+
     input.click();
 }
 
@@ -249,11 +278,21 @@ function showImportModal() {
 
 function checkFirstTime() {
     const profile = getProfile();
-    
+
     if (!profile || !profile.height || !profile.gender) {
-        if (confirm('Bem-vindo! Para começar, vamos configurar seu perfil. Deseja continuar?')) {
-            window.location.href = 'profile.html';
-        }
+        Swal.fire({
+            title: 'Bem-vindo!',
+            text: 'Para começar, vamos configurar seu perfil. Deseja continuar?',
+            icon: 'info',
+            showCancelButton: true,
+            confirmButtonText: 'Sim, vamos lá',
+            cancelButtonText: 'Depois',
+            confirmButtonColor: '#10b981'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = 'profile.html';
+            }
+        });
     }
 }
 
